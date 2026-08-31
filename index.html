@@ -86,6 +86,50 @@
       color: var(--brand-yellow);
     }
 
+    /* カテゴリ（ジャンル）アコーディオン */
+    .category-group {
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--card-bg);
+    }
+
+    .category-header {
+      background: #1a2f4c;
+      color: var(--brand-yellow);
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .category-header:hover {
+      background: #233e63;
+    }
+
+    .category-icon {
+      transition: transform 0.3s ease;
+      font-size: 0.85rem;
+    }
+
+    .category-group.open .category-icon {
+      transform: rotate(180deg);
+    }
+
+    .category-content {
+      display: none;
+      padding: 0 16px;
+    }
+
+    .category-group.open .category-content {
+      display: block;
+    }
+
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem; }
     .form-group label .required { color: var(--brand-yellow); margin-left: 4px; }
@@ -127,7 +171,7 @@
 
     .selection-controls {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
+      grid-template-columns: 1.5fr 1.2fr 1fr 1fr auto;
       gap: 10px;
       align-items: center;
     }
@@ -316,7 +360,7 @@
             <thead>
               <tr>
                 <th>商品名</th>
-                <th>サイズ / 背ネーム</th>
+                <th>カラー / サイズ / 背ネーム</th>
                 <th>数量</th>
                 <th>小計（税込）</th>
               </tr>
@@ -387,6 +431,20 @@
       }
     }
 
+    // ジャンル（カテゴリ）の判別関数
+    function getCategoryName(itemName) {
+      if (itemName.includes("シャツ") || itemName.includes("ピステ") || itemName.includes("ジャージ") || itemName.includes("インナー") || itemName.includes("ウェア") || itemName.includes("スウェット") || itemName.includes("ジャケット")) {
+        return "👕 ウェア・トップス";
+      } else if (itemName.includes("パンツ") || itemName.includes("ショーツ") || itemName.includes("タイツ") || itemName.includes("スラックス")) {
+        return "🩳 パンツ・ボトムス";
+      } else if (itemName.includes("ソックス") || itemName.includes("ストッキング")) {
+        return "🧦 ソックス";
+      } else if (itemName.includes("バッグ") || itemName.includes("リュック") || itemName.includes("ケース") || itemName.includes("バック")) {
+        return "🎒 バッグ・アクセサリー";
+      }
+      return "📦 その他アイテム";
+    }
+
     function renderItems(items) {
       const container = document.getElementById("itemList");
       container.innerHTML = "";
@@ -396,22 +454,54 @@
         return;
       }
 
+      // カテゴリごとにグループ分け
+      const categories = {};
       items.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "item-card";
-        card.dataset.itemId = item.id;
+        const cat = getCategoryName(item.name);
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(item);
+      });
 
-        card.innerHTML = `
-          <div class="item-header">
-            <div class="item-title">${item.name}</div>
-            <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
-          </div>
-          <div class="rows-container" id="rows-${item.id}"></div>
-          <button type="button" class="btn-add-row" onclick="addSelectionRow('${item.id}')">＋ サイズ・数量を追加</button>
+      // カテゴリごとにアコーディオン描画
+      Object.keys(categories).forEach((catName, index) => {
+        const catGroup = document.createElement("div");
+        // 最初のカテゴリだけ最初から開いた状態にする（他は折りたたむ）
+        catGroup.className = `category-group ${index === 0 ? 'open' : ''}`;
+
+        const catHeader = document.createElement("div");
+        catHeader.className = "category-header";
+        catHeader.innerHTML = `
+          <span>${catName} (${categories[catName].length})</span>
+          <span class="category-icon">▼</span>
         `;
+        catHeader.onclick = () => catGroup.classList.toggle("open");
 
-        container.appendChild(card);
-        addSelectionRow(item.id);
+        const catContent = document.createElement("div");
+        catContent.className = "category-content";
+
+        categories[catName].forEach(item => {
+          const card = document.createElement("div");
+          card.className = "item-card";
+          card.dataset.itemId = item.id;
+
+          card.innerHTML = `
+            <div class="item-header">
+              <div class="item-title">${item.name}</div>
+              <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
+            </div>
+            <div class="rows-container" id="rows-${item.id}"></div>
+            <button type="button" class="btn-add-row" onclick="addSelectionRow('${item.id}')">＋ カラー・サイズ・数量を追加</button>
+          `;
+
+          catContent.appendChild(card);
+        });
+
+        catGroup.appendChild(catHeader);
+        catGroup.appendChild(catContent);
+        container.appendChild(catGroup);
+
+        // 各商品にデフォルトで最初の1行を追加
+        categories[catName].forEach(item => addSelectionRow(item.id));
       });
     }
 
@@ -423,9 +513,18 @@
       const rowIndex = container.children.length;
       const isShirt = item.name.includes("プラクティスシャツ");
 
-      const sizeOptions = item.sizes.length > 0
-        ? item.sizes.map(s => `<option value="${s}">${s}</option>`).join("")
+      // カラーオプションの構築
+      const colors = (item.colors && item.colors.length > 0) ? item.colors : (item.color ? [item.color] : []);
+      const colorOptions = colors.length > 0
+        ? colors.map(c => `<option value="${c}">${c}</option>`).join("")
         : `<option value="-">-</option>`;
+
+      // サイズオプションの構築
+      const sizes = item.sizes || [];
+      const sizeOptions = sizes.length > 0
+        ? sizes.map(s => `<option value="${s}">${s}</option>`).join("")
+        : `<option value="-">-</option>`;
+
       const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
 
       const rowDiv = document.createElement("div");
@@ -435,16 +534,22 @@
       rowDiv.innerHTML = `
         <div class="selection-controls">
           <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:2px;">カラー</label>
+            <select class="form-control row-color">${colorOptions}</select>
+          </div>
+          <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:2px;">サイズ</label>
             <select class="form-control row-size">${sizeOptions}</select>
           </div>
           <div>
+            <label style="font-size:0.75rem; color:var(--text-sub); display:block; margin-bottom:2px;">数量</label>
             <select class="form-control row-qty" onchange="calculateTotal()">${qtyOptions}</select>
           </div>
-          <div class="row-subtotal" style="text-align: right; font-weight: bold; color: var(--brand-yellow);">
+          <div class="row-subtotal" style="text-align: right; font-weight: bold; color: var(--brand-yellow); align-self: center; padding-top: 14px;">
             ¥0
           </div>
-          <div>
-            ${rowIndex > 0 ? `<button type="button" class="btn-remove" onclick="removeRow(this)">削除</button>` : `<span style="width:50px; display:inline-block;"></span>`}
+          <div style="align-self: center; padding-top: 14px;">
+            ${rowIndex > 0 ? `<button type="button" class="btn-remove" onclick="removeRow(this)">削除</button>` : `<span style="width:40px; display:inline-block;"></span>`}
           </div>
         </div>
 
@@ -505,6 +610,7 @@
 
         const qty = parseInt(row.querySelector(".row-qty").value, 10);
         if (qty > 0) {
+          const color = row.querySelector(".row-color").value;
           const size = row.querySelector(".row-size").value;
           const printInput = row.querySelector(".row-print-name");
           const printName = printInput ? printInput.value.trim() : "";
@@ -512,7 +618,7 @@
           selected.push({
             code: item.code,
             name: item.name,
-            color: item.color,
+            color: color,
             price: item.price,
             size: size,
             qty: qty,
@@ -535,7 +641,7 @@
 
       for (const item of selectedItems) {
         if (item.isShirt && !item.printName) {
-          alert(`プラクティスシャツ（${item.size}サイズ）の背ネーム（ローマ字大文字）を入力してください。`);
+          alert(`プラクティスシャツ（カラー:${item.color} / ${item.size}サイズ）の背ネーム（ローマ字大文字）を入力してください。`);
           return;
         }
       }
@@ -565,15 +671,15 @@
       const selectedItems = getSelectedItemsData();
 
       selectedItems.forEach(item => {
-        let sizeDetail = item.size;
+        let details = `カラー: ${item.color} / サイズ: ${item.size}`;
         if (item.printName) {
-          sizeDetail += ` / 背ネーム: ${item.printName}`;
+          details += ` / 背ネーム: ${item.printName}`;
         }
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${item.name}</td>
-          <td>${sizeDetail}</td>
+          <td>${details}</td>
           <td>${item.qty}</td>
           <td>¥${(item.price * item.qty).toLocaleString()}</td>
         `;

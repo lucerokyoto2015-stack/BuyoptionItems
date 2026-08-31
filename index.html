@@ -551,24 +551,29 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "送信中...";
 
-      const selectedItems = [];
-      document.querySelectorAll(".item-qty").forEach(select => {
-        const qty = parseInt(select.value, 10);
-        if (qty > 0) {
-          const itemId = select.dataset.id;
-          const isShirt = select.dataset.isshirt === "true";
-          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
-          const printNameInput = document.getElementById(`printName-${itemId}`);
+     const selectedItems = [];
+document.querySelectorAll(".item-qty").forEach(select => {
+  const qty = parseInt(select.value, 10);
+  if (qty > 0) {
+    const itemId = select.dataset.id;
+    const isShirt = select.dataset.isshirt === "true";
+    const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
+    const printNameInput = document.getElementById(`printName-${itemId}`);
+    
+    // 該当商品のデータ（fetchItemsで保持しているavailableItemsから検索）
+    const itemData = availableItems.find(i => i.id === itemId);
 
-          selectedItems.push({
-            name: select.dataset.name,
-            price: parseInt(select.dataset.price, 10),
-            size: sizeSelect ? sizeSelect.value : "-",
-            printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
-            qty: qty
-          });
-        }
-      });
+    selectedItems.push({
+      code: itemData ? itemData.code : "",
+      name: select.dataset.name,
+      color: itemData ? itemData.color : "",
+      price: parseInt(select.dataset.price, 10),
+      size: sizeSelect ? sizeSelect.value : "-",
+      printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
+      qty: qty
+    });
+  }
+});
 
       const payload = {
         grade: document.getElementById("grade").value,

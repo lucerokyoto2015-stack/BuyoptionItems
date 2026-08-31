@@ -86,7 +86,7 @@
       color: var(--brand-yellow);
     }
 
-    /* カテゴリ（ジャンル）アコーディオン */
+    /* F列ジャンルごとのアコーディオンデザイン */
     .category-group {
       margin-bottom: 16px;
       border: 1px solid var(--border-color);
@@ -106,6 +106,7 @@
       justify-content: space-between;
       align-items: center;
       user-select: none;
+      transition: background 0.2s ease;
     }
 
     .category-header:hover {
@@ -407,7 +408,7 @@
   </div>
 
   <script>
-    // デプロイしたGASの「ウェブアプリURL」を入力してください
+    // デプロイしたGASのウェブアプリURLを指定
     const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyNqfDEIm74ngKv8CEesCHG3Jh7LJTd6aLjRptFWR9wXWA8Iw3aRAYNwLo5_fzMmlHwJA/exec";
 
     let availableItems = [];
@@ -419,9 +420,7 @@
         const res = await fetch(GAS_ENDPOINT_URL);
         const data = await res.json();
 
-        if (data.error) {
-          throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
 
         availableItems = data;
         renderItems(availableItems);
@@ -429,20 +428,6 @@
         console.error("商品読み込み失敗:", err);
         document.getElementById("itemList").innerHTML = `<p style='color:#e53e3e;'>商品の読み込みに失敗しました。<br><small style="color:#b0c4de;">(${err.message})</small></p>`;
       }
-    }
-
-    // ジャンル（カテゴリ）の判別関数
-    function getCategoryName(itemName) {
-      if (itemName.includes("シャツ") || itemName.includes("ピステ") || itemName.includes("ジャージ") || itemName.includes("インナー") || itemName.includes("ウェア") || itemName.includes("スウェット") || itemName.includes("ジャケット")) {
-        return "👕 ウェア・トップス";
-      } else if (itemName.includes("パンツ") || itemName.includes("ショーツ") || itemName.includes("タイツ") || itemName.includes("スラックス")) {
-        return "🩳 パンツ・ボトムス";
-      } else if (itemName.includes("ソックス") || itemName.includes("ストッキング")) {
-        return "🧦 ソックス";
-      } else if (itemName.includes("バッグ") || itemName.includes("リュック") || itemName.includes("ケース") || itemName.includes("バック")) {
-        return "🎒 バッグ・アクセサリー";
-      }
-      return "📦 その他アイテム";
     }
 
     function renderItems(items) {
@@ -454,24 +439,24 @@
         return;
       }
 
-      // カテゴリごとにグループ分け
+      // F列（category）ごとにグループ分類
       const categories = {};
       items.forEach(item => {
-        const cat = getCategoryName(item.name);
+        const cat = item.category || "その他";
         if (!categories[cat]) categories[cat] = [];
         categories[cat].push(item);
       });
 
-      // カテゴリごとにアコーディオン描画
+      // カテゴリごとにアコーディオンを作成
       Object.keys(categories).forEach((catName, index) => {
         const catGroup = document.createElement("div");
-        // 最初のカテゴリだけ最初から開いた状態にする（他は折りたたむ）
+        // 先頭のカテゴリのみ初期表示で展開
         catGroup.className = `category-group ${index === 0 ? 'open' : ''}`;
 
         const catHeader = document.createElement("div");
         catHeader.className = "category-header";
         catHeader.innerHTML = `
-          <span>${catName} (${categories[catName].length})</span>
+          <span>📁 ${catName} (${categories[catName].length})</span>
           <span class="category-icon">▼</span>
         `;
         catHeader.onclick = () => catGroup.classList.toggle("open");
@@ -500,7 +485,7 @@
         catGroup.appendChild(catContent);
         container.appendChild(catGroup);
 
-        // 各商品にデフォルトで最初の1行を追加
+        // 各商品に初期状態の1行を挿入
         categories[catName].forEach(item => addSelectionRow(item.id));
       });
     }
@@ -513,13 +498,13 @@
       const rowIndex = container.children.length;
       const isShirt = item.name.includes("プラクティスシャツ");
 
-      // カラーオプションの構築
-      const colors = (item.colors && item.colors.length > 0) ? item.colors : (item.color ? [item.color] : []);
+      // カラー（E列）オプション設定
+      const colors = item.colors || [];
       const colorOptions = colors.length > 0
         ? colors.map(c => `<option value="${c}">${c}</option>`).join("")
         : `<option value="-">-</option>`;
 
-      // サイズオプションの構築
+      // サイズ（D列）オプション設定
       const sizes = item.sizes || [];
       const sizeOptions = sizes.length > 0
         ? sizes.map(s => `<option value="${s}">${s}</option>`).join("")
@@ -616,7 +601,7 @@
           const printName = printInput ? printInput.value.trim() : "";
 
           selected.push({
-            code: item.code,
+            code: item.code || item.id,
             name: item.name,
             color: color,
             price: item.price,

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サッカークラブ オプションアイテム購入申し込み</title>
+  <style>
+    :root {
+      --primary-color: #1b4332;
+      --accent-color: #2d6a4f;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dee2e6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding-bottom: 100px;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      text-align: center;
+      padding: 24px 16px;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+      color: #e63946;
+      margin-left: 4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.2);
+    }
+
+    /* アイテム選択 */
+    .item-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      font-weight: bold;
+    }
+
+    .item-price {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    /* 固定ポップアップ（合計表示） */
+    .summary-popup {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 2px solid var(--primary-color);
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .summary-content {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-info {
+      font-size: 1.1rem;
+    }
+
+    .summary-info strong {
+      color: var(--primary-color);
+      font-size: 1.3rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-color);
+    }
+
+    .btn:disabled {
+      background-color: #adb5bd;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      margin-right: 12px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #495057;
+    }
+
+    /* ステップ制御 */
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    /* 確認画面スタイル */
+    .confirm-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .confirm-table th, .confirm-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    .confirm-table th {
+      background-color: #f1f3f5;
+      width: 30%;
+    }
+
+    .checkbox-container {
+      background: #fff3cd;
+      border: 1px solid #ffe69c;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-container label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 600px) {
+      .item-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .item-info {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>サッカークラブ オプションアイテム購入申し込み</h1>
+  </header>
+
+  <div class="container">
+    <form id="orderForm">
+      <div id="step1" class="step active">
+        <div class="card">
+          <h2>① 選手・保護者情報の入力</h2>
+          <div class="form-group">
+            <label for="grade">学年<span class="required">*</span></label>
+            <select id="grade" class="form-control" required>
+              <option value="">選択してください</option>
+              <option value="U13">U13</option>
+              <option value="U14">U14</option>
+              <option value="U15">U15</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="playerName">選手氏名（漢字フルネーム）<span class="required">*</span></label>
+            <input type="text" id="playerName" class="form-control" placeholder="例：山田 太郎" required>
+          </div>
+          <div class="form-group">
+            <label for="uniformNumber">背番号<span class="required">*</span></label>
+            <input type="number" id="uniformNumber" class="form-control" placeholder="例：10" required>
+          </div>
+          <div class="form-group">
+            <label for="email">メールアドレス<span class="required">*</span></label>
+            <input type="email" id="email" class="form-control" placeholder="例：example@example.com" required>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>④ アイテム選択</h2>
+          <div id="itemList">
+            <p>アイテム情報を読み込み中...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="step2" class="step">
+        <div class="card">
+          <h2>⑤ 申し込み内容の確認</h2>
+          
+          <h3>【お申込者情報】</h3>
+          <table class="confirm-table">
+            <tr><th>学年</th><td id="confirmGrade"></td></tr>
+            <tr><th>選手氏名</th><td id="confirmName"></td></tr>
+            <tr><th>背番号</th><td id="confirmNumber"></td></tr>
+            <tr><th>メールアドレス</th><td id="confirmEmail"></td></tr>
+          </table>
+
+          <h3>【選択したアイテム】</h3>
+          <table class="confirm-table">
+            <thead>
+              <tr>
+                <th>商品名</th>
+                <th>サイズ</th>
+                <th>数量</th>
+                <th>小計（税込）</th>
+              </tr>
+            </thead>
+            <tbody id="confirmItems">
+            </tbody>
+          </table>
+
+          <div style="text-align: right; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;">
+            総合計金額（税込）: <span id="confirmTotal" style="color: var(--primary-color);">¥0</span>
+          </div>
+
+          <div class="checkbox-container">
+            <label>
+              <input type="checkbox" id="agreeTerms">
+              <span>入力した内容に間違いはありません。また、メーカーの在庫状況やデザイン変更等により、ご希望のアイテムが用意できない場合があることを確認しました。（その場合はメーカーからの回答後、保護者様へご連絡いたします）</span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" onclick="goToStep(1)">修正する</button>
+            <button type="submit" id="submitBtn" class="btn" disabled>申込する</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="step3" class="step">
+        <div class="card" style="text-align: center; padding: 40px 24px;">
+          <h2>申し込みが完了しました</h2>
+          <p style="margin-top: 16px;">ご入力いただいたメールアドレス宛に、お申し込み詳細の確認メールを送信いたしました。</p>
+          <p style="margin-top: 8px; color: #6c757d;">万が一メールが届かない場合は、クラブ事務局までお問い合わせください。</p>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="summaryPopup" class="summary-popup">
+    <div class="summary-content">
+      <div class="summary-info">
+        合計アイテム数: <strong id="totalCount">0</strong> 点 / 
+        合計金額（税込）: <strong id="totalAmount">¥0</strong>
+      </div>
+      <button type="button" class="btn" onclick="validateAndGoToConfirm()">確認画面へ進む</button>
+    </div>
+  </div>
+
+  <script>
+    // ※ ここにGoogle Apps Scriptで発行したWeb App URLを貼り付けます
+    const GAS_ENDPOINT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+    // 商品データ保持用（GAS接続前用のフォールバック兼初期化）
+    let availableItems = [];
+
+    // 初期サンプルデータ（GASと連携するまでの確認用）
+    const sampleItems = [
+      { id: "1", name: "ピステトップ", price: 6600, sizes: ["S", "M", "L", "XL"] },
+      { id: "2", name: "ピステパンツ", price: 5500, sizes: ["S", "M", "L", "XL"] },
+      { id: "3", name: "オフィシャルリュック", price: 9900, sizes: ["FREE"] },
+      { id: "4", name: "トレーニングソックス", price: 1650, sizes: ["23-25cm", "25-27cm", "27-29cm"] }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchItems();
+    });
+
+    // 商品データの読み込み
+    async function fetchItems() {
+      const itemListContainer = document.getElementById("itemList");
+      try {
+        if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+          const res = await fetch(GAS_ENDPOINT_URL);
+          availableItems = await res.json();
+        } else {
+          availableItems = sampleItems;
+        }
+        renderItems(availableItems);
+      } catch (err) {
+        console.error("アイテムの読み込みに失敗しました:", err);
+        renderItems(sampleItems);
+      }
+    }
+
+    // 商品一覧の描画
+    function renderItems(items) {
+      const container = document.getElementById("itemList");
+      container.innerHTML = "";
+
+      items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "item-row";
+        
+        const sizeOptions = item.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+        const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
+
+        row.innerHTML = `
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
+          </div>
+          <div>
+            <select class="form-control item-size" data-id="${item.id}">
+              ${sizeOptions}
+            </select>
+          </div>
+          <div>
+            <select class="form-control item-qty" data-id="${item.id}" data-price="${item.price}" data-name="${item.name}" onchange="calculateTotal()">
+              ${qtyOptions}
+            </select>
+          </div>
+          <div class="item-subtotal" id="subtotal-${item.id}" style="text-align: right; font-weight: bold;">
+            ¥0
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // 合計金額・数量の計算
+    function calculateTotal() {
+      let totalQty = 0;
+      let totalPrice = 0;
+
+      const qtySelects = document.querySelectorAll(".item-qty");
+      qtySelects.forEach(select => {
+        const qty = parseInt(select.value, 10);
+        const price = parseInt(select.dataset.price, 10);
+        const itemId = select.dataset.id;
+
+        if (qty > 0) {
+          totalQty += qty;
+          totalPrice += price * qty;
+        }
+
+        // 小計の更新
+        const subtotalEl = document.getElementById(`subtotal-${itemId}`);
+        if (subtotalEl) {
+          subtotalEl.textContent = `¥${(price * qty).toLocaleString()}`;
+        }
+      });
+
+      document.getElementById("totalCount").textContent = totalQty;
+      document.getElementById("totalAmount").textContent = `¥${totalPrice.toLocaleString()}`;
+
+      return { totalQty, totalPrice };
+    }
+
+    // ステップ遷移時の入力チェック
+    function validateAndGoToConfirm() {
+      const grade = document.getElementById("grade").value;
+      const playerName = document.getElementById("playerName").value.trim();
+      const uniformNumber = document.getElementById("uniformNumber").value;
+      const email = document.getElementById("email").value.trim();
+      const { totalQty } = calculateTotal();
+
+      if (!grade || !playerName || !uniformNumber || !email) {
+        alert("個人情報欄の必須項目（*）をすべて入力してください。");
+        return;
+      }
+
+      if (totalQty === 0) {
+        alert("アイテムを1点以上選択してください。");
+        return;
+      }
+
+      // 確認画面にデータをセット
+      document.getElementById("confirmGrade").textContent = grade;
+      document.getElementById("confirmName").textContent = playerName;
+      document.getElementById("confirmNumber").textContent = uniformNumber;
+      document.getElementById("confirmEmail").textContent = email;
+
+      const confirmItemsContainer = document.getElementById("confirmItems");
+      confirmItemsContainer.innerHTML = "";
+
+      const qtySelects = document.querySelectorAll(".item-qty");
+      qtySelects.forEach(select => {
+        const qty = parseInt(select.value, 10);
+        if (qty > 0) {
+          const itemId = select.dataset.id;
+          const itemName = select.dataset.name;
+          const price = parseInt(select.dataset.price, 10);
+          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
+          const size = sizeSelect ? sizeSelect.value : "-";
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${itemName}</td>
+            <td>${size}</td>
+            <td>${qty}</td>
+            <td>¥${(price * qty).toLocaleString()}</td>
+          `;
+          confirmItemsContainer.appendChild(tr);
+        }
+      });
+
+      const { totalPrice } = calculateTotal();
+      document.getElementById("confirmTotal").textContent = `¥${totalPrice.toLocaleString()}`;
+
+      goToStep(2);
+    }
+
+    // ステップ切り替え
+    function goToStep(stepNumber) {
+      document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+      document.getElementById(`step${stepNumber}`).classList.add("active");
+
+      const popup = document.getElementById("summaryPopup");
+      if (stepNumber === 1) {
+        popup.style.display = "block";
+      } else {
+        popup.style.display = "none";
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // チェックボックス制御
+    document.getElementById("agreeTerms").addEventListener("change", (e) => {
+      document.getElementById("submitBtn").disabled = !e.target.checked;
+    });
+
+    // フォーム送信（申込処理）
+    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送信中...";
+
+      const selectedItems = [];
+      document.querySelectorAll(".item-qty").forEach(select => {
+        const qty = parseInt(select.value, 10);
+        if (qty > 0) {
+          const itemId = select.dataset.id;
+          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
+          selectedItems.push({
+            name: select.dataset.name,
+            price: parseInt(select.dataset.price, 10),
+            size: sizeSelect ? sizeSelect.value : "-",
+            qty: qty
+          });
+        }
+      });
+
+      const payload = {
+        grade: document.getElementById("grade").value,
+        playerName: document.getElementById("playerName").value.trim(),
+        uniformNumber: document.getElementById("uniformNumber").value,
+        email: document.getElementById("email").value.trim(),
+        items: selectedItems,
+        totalAmount: calculateTotal().totalPrice
+      };
+
+      try {
+        if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+          await fetch(GAS_ENDPOINT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          // デモ動作（URL未設定時）
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        goToStep(3);
+      } catch (err) {
+        console.error("送信エラー:", err);
+        alert("送信に失敗しました。もう一度お試しいただくか、事務局までご連絡ください。");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "申込する";
+      }
+    });
+  </script>
+</body>
+</html>

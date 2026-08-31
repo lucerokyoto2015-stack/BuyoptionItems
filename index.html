@@ -92,11 +92,11 @@
 
     .form-control {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       background-color: #0b1524;
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #ffffff;
     }
 
@@ -108,32 +108,71 @@
 
     .item-card {
       border-bottom: 1px solid var(--border-color);
-      padding: 16px 0;
+      padding: 20px 0;
     }
 
     .item-card:last-child { border-bottom: none; }
 
-    .item-main-row {
+    .item-header {
+      margin-bottom: 12px;
+    }
+
+    .item-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .item-price {
+      color: var(--text-sub);
+      font-size: 0.9rem;
+    }
+
+    .selection-row {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .selection-controls {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 10px;
       align-items: center;
     }
 
-    .item-name { font-weight: bold; font-size: 1.05rem; }
-    .item-price { color: var(--text-sub); font-size: 0.9rem; }
-
-    .name-print-option {
-      display: none;
-      background: rgba(255, 214, 0, 0.05);
-      border: 1px dashed var(--brand-yellow);
-      border-radius: 6px;
-      padding: 12px;
-      margin-top: 12px;
+    .btn-remove {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
     }
 
-    .name-print-option.active { display: block; }
-    .name-hint { font-size: 0.8rem; color: var(--text-sub); margin-top: 4px; }
+    .btn-add-row {
+      background: transparent;
+      color: var(--brand-yellow);
+      border: 1px dashed var(--brand-yellow);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-add-row:hover {
+      background: rgba(255, 214, 0, 0.1);
+    }
+
+    .name-print-box {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-color);
+    }
 
     .summary-popup {
       position: fixed;
@@ -207,8 +246,8 @@
     .actions { display: flex; justify-content: flex-end; margin-top: 24px; }
 
     @media (max-width: 600px) {
-      .item-main-row { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .item-info { grid-column: span 2; }
+      .selection-controls { grid-template-columns: 1fr 1fr; }
+      .btn-remove { grid-column: span 2; }
       .summary-content { flex-direction: column; gap: 12px; text-align: center; }
       .btn { width: 100%; }
     }
@@ -228,6 +267,7 @@
     </div>
 
     <form id="orderForm">
+      <!-- STEP 1 -->
       <div id="step1" class="step active">
         <div class="card">
           <h2>① 購入アイテム選択</h2>
@@ -237,6 +277,7 @@
         </div>
       </div>
 
+      <!-- STEP 2 -->
       <div id="step2" class="step">
         <div class="card">
           <h2>② 選手・保護者情報の入力</h2>
@@ -269,6 +310,7 @@
         </div>
       </div>
 
+      <!-- STEP 3 -->
       <div id="step3" class="step">
         <div class="card">
           <h2>③ 申し込み内容の確認</h2>
@@ -312,6 +354,7 @@
         </div>
       </div>
 
+      <!-- STEP 4 -->
       <div id="step4" class="step">
         <div class="card" style="text-align: center; padding: 48px 24px;">
           <h2 style="border: none; color: var(--brand-yellow);">申し込みが完了しました</h2>
@@ -332,7 +375,7 @@
   </div>
 
   <script>
-    // ↓ デプロイ時に発行されたGASの「ウェブアプリURL（末尾が /exec）」を貼り付けてください➤入力済み8/31家城
+    // デプロイしたGASの「ウェブアプリURL」を入力してください
     const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyNqfDEIm74ngKv8CEesCHG3Jh7LJTd6aLjRptFWR9wXWA8Iw3aRAYNwLo5_fzMmlHwJA/exec";
 
     let availableItems = [];
@@ -357,78 +400,94 @@
       items.forEach(item => {
         const card = document.createElement("div");
         card.className = "item-card";
-        
-        const sizeOptions = item.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
-        const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
-        const isPracticeShirt = item.name.includes("プラクティスシャツ");
+        card.dataset.itemId = item.id;
 
         card.innerHTML = `
-          <div class="item-main-row">
-            <div class="item-info">
-              <div class="item-name">${item.name}</div>
-              <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
-            </div>
-            <div>
-              <select class="form-control item-size" data-id="${item.id}">${sizeOptions}</select>
-            </div>
-            <div>
-              <select class="form-control item-qty" data-id="${item.id}" data-price="${item.price}" data-name="${item.name}" data-isshirt="${isPracticeShirt}" onchange="handleQtyChange(this)">
-                ${qtyOptions}
-              </select>
-            </div>
-            <div class="item-subtotal" id="subtotal-${item.id}" style="text-align: right; font-weight: bold; color: var(--brand-yellow);">
-              ¥0
-            </div>
+          <div class="item-header">
+            <div class="item-title">${item.name}</div>
+            <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
           </div>
-
-          ${isPracticeShirt ? `
-            <div class="name-print-option" id="nameOption-${item.id}">
-              <label style="font-size: 0.9rem; font-weight: bold; color: var(--brand-yellow);">背中のプリントネーム（半角英大文字のみ）<span class="required">*</span></label>
-              <input type="text" class="form-control item-print-name" id="printName-${item.id}" placeholder="例：TARO" oninput="formatUpperAlpha(this)">
-              <div class="name-hint">※半角アルファベット大文字・スペースのみ入力可能です（自動変換されます）。</div>
-            </div>
-          ` : ''}
+          <div class="rows-container" id="rows-${item.id}"></div>
+          <button type="button" class="btn-add-row" onclick="addSelectionRow('${item.id}')">＋ サイズ・数量を追加</button>
         `;
+
         container.appendChild(card);
+        // 初期状態として1つ選択行を追加
+        addSelectionRow(item.id);
       });
+    }
+
+    function addSelectionRow(itemId) {
+      const item = availableItems.find(i => i.id === itemId);
+      if (!item) return;
+
+      const container = document.getElementById(`rows-${itemId}`);
+      const rowIndex = container.children.length;
+      const isShirt = item.name.includes("プラクティスシャツ");
+
+      const sizeOptions = item.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+      const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
+
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "selection-row";
+      rowDiv.dataset.itemId = itemId;
+
+      rowDiv.innerHTML = `
+        <div class="selection-controls">
+          <div>
+            <select class="form-control row-size">${sizeOptions}</select>
+          </div>
+          <div>
+            <select class="form-control row-qty" onchange="calculateTotal()">${qtyOptions}</select>
+          </div>
+          <div class="row-subtotal" style="text-align: right; font-weight: bold; color: var(--brand-yellow);">
+            ¥0
+          </div>
+          <div>
+            ${rowIndex > 0 ? `<button type="button" class="btn-remove" onclick="removeRow(this)">削除</button>` : `<span style="width:50px; display:inline-block;"></span>`}
+          </div>
+        </div>
+
+        ${isShirt ? `
+          <div class="name-print-box">
+            <label style="font-size: 0.85rem; font-weight: bold; color: var(--brand-yellow);">背中のプリントネーム（半角英大文字）</label>
+            <input type="text" class="form-control row-print-name" placeholder="例：TARO" oninput="formatUpperAlpha(this)" style="margin-top: 4px;">
+          </div>
+        ` : ''}
+      `;
+
+      container.appendChild(rowDiv);
+      calculateTotal();
+    }
+
+    function removeRow(btn) {
+      const row = btn.closest(".selection-row");
+      row.remove();
+      calculateTotal();
     }
 
     function formatUpperAlpha(input) {
       input.value = input.value.toUpperCase().replace(/[^A-Z\s]/g, '');
     }
 
-    function handleQtyChange(selectEl) {
-      const itemId = selectEl.dataset.id;
-      const isShirt = selectEl.dataset.isshirt === "true";
-      const qty = parseInt(selectEl.value, 10);
-
-      if (isShirt) {
-        const optionBox = document.getElementById(`nameOption-${itemId}`);
-        if (qty > 0) {
-          optionBox.classList.add("active");
-        } else {
-          optionBox.classList.remove("active");
-          document.getElementById(`printName-${itemId}`).value = "";
-        }
-      }
-      calculateTotal();
-    }
-
     function calculateTotal() {
       let totalQty = 0;
       let totalPrice = 0;
 
-      document.querySelectorAll(".item-qty").forEach(select => {
-        const qty = parseInt(select.value, 10);
-        const price = parseInt(select.dataset.price, 10);
-        const itemId = select.dataset.id;
+      document.querySelectorAll(".selection-row").forEach(row => {
+        const itemId = row.dataset.itemId;
+        const item = availableItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        const qty = parseInt(row.querySelector(".row-qty").value, 10);
+        const subtotal = item.price * qty;
+
+        row.querySelector(".row-subtotal").textContent = `¥${subtotal.toLocaleString()}`;
 
         if (qty > 0) {
           totalQty += qty;
-          totalPrice += price * qty;
+          totalPrice += subtotal;
         }
-        const subtotalEl = document.getElementById(`subtotal-${itemId}`);
-        if (subtotalEl) subtotalEl.textContent = `¥${(price * qty).toLocaleString()}`;
       });
 
       document.getElementById("totalCount").textContent = totalQty;
@@ -436,29 +495,52 @@
       return { totalQty, totalPrice };
     }
 
+    function getSelectedItemsData() {
+      const selected = [];
+
+      document.querySelectorAll(".selection-row").forEach(row => {
+        const itemId = row.dataset.itemId;
+        const item = availableItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        const qty = parseInt(row.querySelector(".row-qty").value, 10);
+        if (qty > 0) {
+          const size = row.querySelector(".row-size").value;
+          const printInput = row.querySelector(".row-print-name");
+          const printName = printInput ? printInput.value.trim() : "";
+
+          selected.push({
+            code: item.code,
+            name: item.name,
+            color: item.color,
+            price: item.price,
+            size: size,
+            qty: qty,
+            printName: printName,
+            isShirt: item.name.includes("プラクティスシャツ")
+          });
+        }
+      });
+
+      return selected;
+    }
+
     function validateStep1AndGoNext() {
-      const { totalQty } = calculateTotal();
-      if (totalQty === 0) {
+      const selectedItems = getSelectedItemsData();
+
+      if (selectedItems.length === 0) {
         alert("アイテムを1点以上選択してください。");
         return;
       }
 
-      let valid = true;
-      document.querySelectorAll(".item-qty").forEach(select => {
-        const qty = parseInt(select.value, 10);
-        const isShirt = select.dataset.isshirt === "true";
-        const itemId = select.dataset.id;
-
-        if (qty > 0 && isShirt) {
-          const printName = document.getElementById(`printName-${itemId}`).value.trim();
-          if (!printName) {
-            alert("プラクティスシャツの背プリントネーム（ローマ字大文字）を入力してください。");
-            valid = false;
-          }
+      for (const item of selectedItems) {
+        if (item.isShirt && !item.printName) {
+          alert(`プラクティスシャツ（${item.size}サイズ）の背ネーム（ローマ字大文字）を入力してください。`);
+          return;
         }
-      });
+      }
 
-      if (valid) goToStep(2);
+      goToStep(2);
     }
 
     function validateStep2AndGoConfirm() {
@@ -480,31 +562,22 @@
       const confirmItemsContainer = document.getElementById("confirmItems");
       confirmItemsContainer.innerHTML = "";
 
-      document.querySelectorAll(".item-qty").forEach(select => {
-        const qty = parseInt(select.value, 10);
-        if (qty > 0) {
-          const itemId = select.dataset.id;
-          const itemName = select.dataset.name;
-          const price = parseInt(select.dataset.price, 10);
-          const isShirt = select.dataset.isshirt === "true";
+      const selectedItems = getSelectedItemsData();
 
-          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
-          let sizeText = sizeSelect ? sizeSelect.value : "-";
-
-          if (isShirt) {
-            const printName = document.getElementById(`printName-${itemId}`).value.trim();
-            sizeText += ` / 背ネーム: ${printName}`;
-          }
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${itemName}</td>
-            <td>${sizeText}</td>
-            <td>${qty}</td>
-            <td>¥${(price * qty).toLocaleString()}</td>
-          `;
-          confirmItemsContainer.appendChild(tr);
+      selectedItems.forEach(item => {
+        let sizeDetail = item.size;
+        if (item.printName) {
+          sizeDetail += ` / 背ネーム: ${item.printName}`;
         }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td>${sizeDetail}</td>
+          <td>${item.qty}</td>
+          <td>¥${(item.price * item.qty).toLocaleString()}</td>
+        `;
+        confirmItemsContainer.appendChild(tr);
       });
 
       const { totalPrice } = calculateTotal();
@@ -537,34 +610,12 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "送信中...";
 
-      const selectedItems = [];
-      document.querySelectorAll(".item-qty").forEach(select => {
-        const qty = parseInt(select.value, 10);
-        if (qty > 0) {
-          const itemId = select.dataset.id;
-          const isShirt = select.dataset.isshirt === "true";
-          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
-          const printNameInput = document.getElementById(`printName-${itemId}`);
-          const itemData = availableItems.find(i => i.id === itemId);
-
-          selectedItems.push({
-            code: itemData ? itemData.code : "",
-            name: select.dataset.name,
-            color: itemData ? itemData.color : "",
-            price: parseInt(select.dataset.price, 10),
-            size: sizeSelect ? sizeSelect.value : "-",
-            printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
-            qty: qty
-          });
-        }
-      });
-
       const payload = {
         grade: document.getElementById("grade").value,
         playerName: document.getElementById("playerName").value.trim(),
         uniformNumber: document.getElementById("uniformNumber").value,
         email: document.getElementById("email").value.trim(),
-        items: selectedItems,
+        items: getSelectedItemsData(),
         totalAmount: calculateTotal().totalPrice
       };
 

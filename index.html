@@ -6,26 +6,20 @@
   <title>Lucero京都 オプションアイテム購入申し込み</title>
   <style>
     :root {
-      /* Lucero京都カラー設定：ブラック／ダークネイビー × イエロー */
-      --primary-color: #0d1b2a;     /* ダークネイビー・ブラック */
-      --accent-color: #f72585;      
-      --brand-yellow: #ffd600;     /* チームイエロー */
+      --primary-color: #0d1b2a;
+      --brand-yellow: #ffd600;
       --brand-yellow-hover: #e6c200;
-      --bg-color: #080f18;         /* 深みのあるダーク背景 */
-      --card-bg: #132238;         /* カード背景 */
-      --text-color: #ffffff;       /* メインテキスト */
-      --text-sub: #b0c4de;          /* サブテキスト */
-      --border-color: #233854;     /* 枠線 */
+      --bg-color: #080f18;
+      --card-bg: #132238;
+      --text-color: #ffffff;
+      --text-sub: #b0c4de;
+      --border-color: #233854;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       line-height: 1.6;
@@ -41,23 +35,10 @@
       margin-bottom: 24px;
     }
 
-    header h1 {
-      font-size: 1.6rem;
-      letter-spacing: 1px;
-      color: #ffffff;
-    }
+    header h1 span { color: var(--brand-yellow); }
 
-    header h1 span {
-      color: var(--brand-yellow);
-    }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-
-    /* プログレスバー */
     .step-bar {
       display: flex;
       justify-content: space-between;
@@ -77,10 +58,7 @@
       position: relative;
     }
 
-    .step-indicator.active {
-      color: var(--brand-yellow);
-    }
-
+    .step-indicator.active { color: var(--brand-yellow); }
     .step-indicator.active::after {
       content: '';
       position: absolute;
@@ -108,21 +86,9 @@
       color: var(--brand-yellow);
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-    }
-
-    .form-group label .required {
-      color: var(--brand-yellow);
-      margin-left: 4px;
-    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.95rem; }
+    .form-group label .required { color: var(--brand-yellow); margin-left: 4px; }
 
     .form-control {
       width: 100%;
@@ -140,37 +106,40 @@
       box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.2);
     }
 
-    /* アイテム選択テーブル風リスト */
-    .item-row {
+    /* アイテムカードスタイル */
+    .item-card {
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0;
+    }
+
+    .item-card:last-child { border-bottom: none; }
+
+    .item-main-row {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 12px;
       align-items: center;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border-color);
     }
 
-    .item-row:last-child {
-      border-bottom: none;
+    .item-name { font-weight: bold; font-size: 1.05rem; }
+    .item-price { color: var(--text-sub); font-size: 0.9rem; }
+
+    /* プラクティスシャツ用 名入れオプション領域 */
+    .name-print-option {
+      display: none;
+      background: rgba(255, 214, 0, 0.05);
+      border: 1px dashed var(--brand-yellow);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
     }
 
-    .item-name {
-      font-weight: bold;
-      font-size: 1.05rem;
-      color: #ffffff;
-    }
+    .name-print-option.active { display: block; }
+    .name-hint { font-size: 0.8rem; color: var(--text-sub); margin-top: 4px; }
 
-    .item-price {
-      color: var(--text-sub);
-      font-size: 0.9rem;
-    }
-
-    /* 固定ポップアップ（合計表示） */
     .summary-popup {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: #080f18;
       border-top: 3px solid var(--brand-yellow);
       box-shadow: 0 -6px 20px rgba(0,0,0,0.5);
@@ -186,18 +155,8 @@
       align-items: center;
     }
 
-    .summary-info {
-      font-size: 1rem;
-      color: var(--text-sub);
-    }
+    .summary-info strong { color: var(--brand-yellow); font-size: 1.3rem; margin: 0 4px; }
 
-    .summary-info strong {
-      color: var(--brand-yellow);
-      font-size: 1.3rem;
-      margin: 0 4px;
-    }
-
-    /* ボタンデザイン */
     .btn {
       background-color: var(--brand-yellow);
       color: #000000;
@@ -207,20 +166,10 @@
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.2s;
     }
 
-    .btn:hover {
-      background-color: var(--brand-yellow-hover);
-      transform: translateY(-1px);
-    }
-
-    .btn:disabled {
-      background-color: #4a5568;
-      color: #a0aec0;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .btn:hover { background-color: var(--brand-yellow-hover); }
+    .btn:disabled { background-color: #4a5568; color: #a0aec0; cursor: not-allowed; }
 
     .btn-secondary {
       background-color: transparent;
@@ -229,21 +178,9 @@
       margin-right: 12px;
     }
 
-    .btn-secondary:hover {
-      background-color: var(--border-color);
-      color: #ffffff;
-    }
+    .step { display: none; }
+    .step.active { display: block; }
 
-    /* ステップ制御 */
-    .step {
-      display: none;
-    }
-
-    .step.active {
-      display: block;
-    }
-
-    /* 確認画面スタイル */
     .confirm-table {
       width: 100%;
       border-collapse: collapse;
@@ -256,11 +193,7 @@
       text-align: left;
     }
 
-    .confirm-table th {
-      background-color: #0b1524;
-      color: var(--text-sub);
-      width: 30%;
-    }
+    .confirm-table th { background-color: #0b1524; color: var(--text-sub); width: 30%; }
 
     .checkbox-container {
       background: rgba(255, 214, 0, 0.08);
@@ -270,45 +203,16 @@
       margin-bottom: 24px;
     }
 
-    .checkbox-container label {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      color: #ffffff;
-    }
+    .checkbox-container label { display: flex; gap: 12px; cursor: pointer; }
+    .checkbox-container input[type="checkbox"] { accent-color: var(--brand-yellow); }
 
-    .checkbox-container input[type="checkbox"] {
-      margin-top: 4px;
-      width: 20px;
-      height: 20px;
-      accent-color: var(--brand-yellow);
-    }
+    .actions { display: flex; justify-content: flex-end; margin-top: 24px; }
 
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 24px;
-    }
-
-    /* レスポンシブ */
     @media (max-width: 600px) {
-      .item-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      .item-info {
-        grid-column: span 2;
-      }
-      .summary-content {
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
-      }
-      .btn {
-        width: 100%;
-      }
+      .item-main-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .item-info { grid-column: span 2; }
+      .summary-content { flex-direction: column; gap: 12px; text-align: center; }
+      .btn { width: 100%; }
     }
   </style>
 </head>
@@ -319,7 +223,6 @@
   </header>
 
   <div class="container">
-    <!-- ステップ表示 -->
     <div class="step-bar">
       <div id="ind-step1" class="step-indicator active">1. アイテム選択</div>
       <div id="ind-step2" class="step-indicator">2. 個人情報入力</div>
@@ -327,7 +230,7 @@
     </div>
 
     <form id="orderForm">
-      <!-- STEP 1: アイテム選択画面 -->
+      <!-- STEP 1 -->
       <div id="step1" class="step active">
         <div class="card">
           <h2>① 購入アイテム選択</h2>
@@ -337,7 +240,7 @@
         </div>
       </div>
 
-      <!-- STEP 2: 個人情報入力画面 -->
+      <!-- STEP 2 -->
       <div id="step2" class="step">
         <div class="card">
           <h2>② 選手・保護者情報の入力</h2>
@@ -370,7 +273,7 @@
         </div>
       </div>
 
-      <!-- STEP 3: 確認画面 -->
+      <!-- STEP 3 -->
       <div id="step3" class="step">
         <div class="card">
           <h2>③ 申し込み内容の確認</h2>
@@ -388,13 +291,12 @@
             <thead>
               <tr>
                 <th>商品名</th>
-                <th>サイズ</th>
+                <th>サイズ / 背ネーム</th>
                 <th>数量</th>
                 <th>小計（税込）</th>
               </tr>
             </thead>
-            <tbody id="confirmItems">
-            </tbody>
+            <tbody id="confirmItems"></tbody>
           </table>
 
           <div style="text-align: right; font-size: 1.25rem; font-weight: bold; margin-bottom: 24px;">
@@ -404,7 +306,7 @@
           <div class="checkbox-container">
             <label>
               <input type="checkbox" id="agreeTerms">
-              <span>入力した内容に間違いはありません。また、メーカーの在庫状況やデザイン変更等によりご用意できない場合があることを確認しました。（その場合はメーカーからの回答後、保護者様へご連絡いたします）</span>
+              <span>入力した内容に間違いはありません。また、メーカーの在庫状況やデザイン変更等によりご用意できない場合があることを確認しました。</span>
             </label>
           </div>
 
@@ -415,18 +317,16 @@
         </div>
       </div>
 
-      <!-- STEP 4: 完了画面 -->
+      <!-- STEP 4 -->
       <div id="step4" class="step">
         <div class="card" style="text-align: center; padding: 48px 24px;">
           <h2 style="border: none; color: var(--brand-yellow);">申し込みが完了しました</h2>
           <p style="margin-top: 16px;">ご入力いただいたメールアドレス宛に、お申し込み詳細の確認メールを送信いたしました。</p>
-          <p style="margin-top: 8px; color: var(--text-sub);">万が一メールが届かない場合は、クラブ事務局までお問い合わせください。</p>
         </div>
       </div>
     </form>
   </div>
 
-  <!-- STEP1用 下部固定ポップアップ（合計表示） -->
   <div id="summaryPopup" class="summary-popup">
     <div class="summary-content">
       <div class="summary-info">
@@ -438,81 +338,100 @@
   </div>
 
   <script>
-    // ※ ここにGoogle Apps Scriptで発行したWeb App URLを設定します
     const GAS_ENDPOINT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
-    let availableItems = [];
-
-    // 初期サンプルデータ（GAS接続前の表示用）
     const sampleItems = [
-      { id: "1", name: "ピステトップ", price: 6600, sizes: ["S", "M", "L", "XL"] },
+      { id: "1", name: "プラクティスシャツ", price: 6600, sizes: ["S", "M", "L", "XL"] },
       { id: "2", name: "ピステパンツ", price: 5500, sizes: ["S", "M", "L", "XL"] },
       { id: "3", name: "オフィシャルリュック", price: 9900, sizes: ["FREE"] },
       { id: "4", name: "トレーニングソックス", price: 1650, sizes: ["23-25cm", "25-27cm", "27-29cm"] }
     ];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchItems();
-    });
+    document.addEventListener("DOMContentLoaded", fetchItems);
 
-    // アイテムデータの読み込み
     async function fetchItems() {
+      let availableItems = sampleItems;
       try {
         if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
           const res = await fetch(GAS_ENDPOINT_URL);
           availableItems = await res.json();
-        } else {
-          availableItems = sampleItems;
         }
-        renderItems(availableItems);
       } catch (err) {
-        console.error("アイテム読み込み失敗:", err);
-        renderItems(sampleItems);
+        console.error(err);
       }
+      renderItems(availableItems);
     }
 
-    // アイテム一覧の生成
     function renderItems(items) {
       const container = document.getElementById("itemList");
       container.innerHTML = "";
 
       items.forEach(item => {
-        const row = document.createElement("div");
-        row.className = "item-row";
+        const card = document.createElement("div");
+        card.className = "item-card";
         
         const sizeOptions = item.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
         const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
+        const isPracticeShirt = item.name.includes("プラクティスシャツ");
 
-        row.innerHTML = `
-          <div class="item-info">
-            <div class="item-name">${item.name}</div>
-            <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
+        card.innerHTML = `
+          <div class="item-main-row">
+            <div class="item-info">
+              <div class="item-name">${item.name}</div>
+              <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
+            </div>
+            <div>
+              <select class="form-control item-size" data-id="${item.id}">${sizeOptions}</select>
+            </div>
+            <div>
+              <select class="form-control item-qty" data-id="${item.id}" data-price="${item.price}" data-name="${item.name}" data-isshirt="${isPracticeShirt}" onchange="handleQtyChange(this)">
+                ${qtyOptions}
+              </select>
+            </div>
+            <div class="item-subtotal" id="subtotal-${item.id}" style="text-align: right; font-weight: bold; color: var(--brand-yellow);">
+              ¥0
+            </div>
           </div>
-          <div>
-            <select class="form-control item-size" data-id="${item.id}">
-              ${sizeOptions}
-            </select>
-          </div>
-          <div>
-            <select class="form-control item-qty" data-id="${item.id}" data-price="${item.price}" data-name="${item.name}" onchange="calculateTotal()">
-              ${qtyOptions}
-            </select>
-          </div>
-          <div class="item-subtotal" id="subtotal-${item.id}" style="text-align: right; font-weight: bold; color: var(--brand-yellow);">
-            ¥0
-          </div>
+
+          ${isPracticeShirt ? `
+            <div class="name-print-option" id="nameOption-${item.id}">
+              <label style="font-size: 0.9rem; font-weight: bold; color: var(--brand-yellow);">背中のプリントネーム（半角英大文字のみ）<span class="required">*</span></label>
+              <input type="text" class="form-control item-print-name" id="printName-${item.id}" placeholder="例：TARO" oninput="formatUpperAlpha(this)">
+              <div class="name-hint">※半角アルファベット大文字・スペースのみ入力可能です（自動変換されます）。</div>
+            </div>
+          ` : ''}
         `;
-        container.appendChild(row);
+        container.appendChild(card);
       });
     }
 
-    // 計算処理
+    // 英大文字・半角スペースのみ自動変換
+    function formatUpperAlpha(input) {
+      input.value = input.value.toUpperCase().replace(/[^A-Z\s]/g, '');
+    }
+
+    function handleQtyChange(selectEl) {
+      const itemId = selectEl.dataset.id;
+      const isShirt = selectEl.dataset.isshirt === "true";
+      const qty = parseInt(selectEl.value, 10);
+
+      if (isShirt) {
+        const optionBox = document.getElementById(`nameOption-${itemId}`);
+        if (qty > 0) {
+          optionBox.classList.add("active");
+        } else {
+          optionBox.classList.remove("active");
+          document.getElementById(`printName-${itemId}`).value = "";
+        }
+      }
+      calculateTotal();
+    }
+
     function calculateTotal() {
       let totalQty = 0;
       let totalPrice = 0;
 
-      const qtySelects = document.querySelectorAll(".item-qty");
-      qtySelects.forEach(select => {
+      document.querySelectorAll(".item-qty").forEach(select => {
         const qty = parseInt(select.value, 10);
         const price = parseInt(select.dataset.price, 10);
         const itemId = select.dataset.id;
@@ -521,30 +440,41 @@
           totalQty += qty;
           totalPrice += price * qty;
         }
-
         const subtotalEl = document.getElementById(`subtotal-${itemId}`);
-        if (subtotalEl) {
-          subtotalEl.textContent = `¥${(price * qty).toLocaleString()}`;
-        }
+        if (subtotalEl) subtotalEl.textContent = `¥${(price * qty).toLocaleString()}`;
       });
 
       document.getElementById("totalCount").textContent = totalQty;
       document.getElementById("totalAmount").textContent = `¥${totalPrice.toLocaleString()}`;
-
       return { totalQty, totalPrice };
     }
 
-    // STEP1（アイテム選択）バリデーション
     function validateStep1AndGoNext() {
       const { totalQty } = calculateTotal();
       if (totalQty === 0) {
         alert("アイテムを1点以上選択してください。");
         return;
       }
-      goToStep(2);
+
+      // プラクティスシャツ選択時の背ネーム入力チェック
+      let valid = true;
+      document.querySelectorAll(".item-qty").forEach(select => {
+        const qty = parseInt(select.value, 10);
+        const isShirt = select.dataset.isshirt === "true";
+        const itemId = select.dataset.id;
+
+        if (qty > 0 && isShirt) {
+          const printName = document.getElementById(`printName-${itemId}`).value.trim();
+          if (!printName) {
+            alert("プラクティスシャツの背プリントネーム（ローマ字大文字）を入力してください。");
+            valid = false;
+          }
+        }
+      });
+
+      if (valid) goToStep(2);
     }
 
-    // STEP2（個人情報）バリデーション＆確認画面生成
     function validateStep2AndGoConfirm() {
       const grade = document.getElementById("grade").value;
       const playerName = document.getElementById("playerName").value.trim();
@@ -556,7 +486,6 @@
         return;
       }
 
-      // 確認画面へのデータ挿入
       document.getElementById("confirmGrade").textContent = grade;
       document.getElementById("confirmName").textContent = playerName;
       document.getElementById("confirmNumber").textContent = uniformNumber;
@@ -565,20 +494,26 @@
       const confirmItemsContainer = document.getElementById("confirmItems");
       confirmItemsContainer.innerHTML = "";
 
-      const qtySelects = document.querySelectorAll(".item-qty");
-      qtySelects.forEach(select => {
+      document.querySelectorAll(".item-qty").forEach(select => {
         const qty = parseInt(select.value, 10);
         if (qty > 0) {
           const itemId = select.dataset.id;
           const itemName = select.dataset.name;
           const price = parseInt(select.dataset.price, 10);
+          const isShirt = select.dataset.isshirt === "true";
+
           const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
-          const size = sizeSelect ? sizeSelect.value : "-";
+          let sizeText = sizeSelect ? sizeSelect.value : "-";
+
+          if (isShirt) {
+            const printName = document.getElementById(`printName-${itemId}`).value.trim();
+            sizeText += ` / 背ネーム: ${printName}`;
+          }
 
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${itemName}</td>
-            <td>${size}</td>
+            <td>${sizeText}</td>
             <td>${qty}</td>
             <td>¥${(price * qty).toLocaleString()}</td>
           `;
@@ -592,40 +527,23 @@
       goToStep(3);
     }
 
-    // 画面切り替え共通関数
     function goToStep(stepNumber) {
-      // 画面切り替え
       document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
       document.getElementById(`step${stepNumber}`).classList.add("active");
 
-      // プログレスバーの更新
       for (let i = 1; i <= 3; i++) {
         const ind = document.getElementById(`ind-step${i}`);
-        if (ind) {
-          if (i === stepNumber) {
-            ind.classList.add("active");
-          } else {
-            ind.classList.remove("active");
-          }
-        }
+        if (ind) ind.classList.toggle("active", i === stepNumber);
       }
 
-      // ポップアップの表示制御（STEP1のみ表示）
-      const popup = document.getElementById("summaryPopup");
-      if (stepNumber === 1) {
-        popup.style.display = "block";
-      } else {
-        popup.style.display = "none";
-      }
+      document.getElementById("summaryPopup").style.display = (stepNumber === 1) ? "block" : "none";
       window.scrollTo(0, 0);
     }
 
-    // 利用規約チェックボックス
     document.getElementById("agreeTerms").addEventListener("change", (e) => {
       document.getElementById("submitBtn").disabled = !e.target.checked;
     });
 
-    // フォーム送信
     document.getElementById("orderForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -638,11 +556,15 @@
         const qty = parseInt(select.value, 10);
         if (qty > 0) {
           const itemId = select.dataset.id;
+          const isShirt = select.dataset.isshirt === "true";
           const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
+          const printNameInput = document.getElementById(`printName-${itemId}`);
+
           selectedItems.push({
             name: select.dataset.name,
             price: parseInt(select.dataset.price, 10),
             size: sizeSelect ? sizeSelect.value : "-",
+            printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
             qty: qty
           });
         }
@@ -671,7 +593,7 @@
         goToStep(4);
       } catch (err) {
         console.error("送信エラー:", err);
-        alert("送信に失敗しました。もう一度お試しいただくか、事務局までご連絡ください。");
+        alert("送信に失敗しました。もう一度お試しください。");
         submitBtn.disabled = false;
         submitBtn.textContent = "申込する";
       }

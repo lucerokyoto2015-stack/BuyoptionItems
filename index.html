@@ -456,7 +456,7 @@
         const catHeader = document.createElement("div");
         catHeader.className = "category-header";
         catHeader.innerHTML = `
-          <span>📁 ${catName} (${categories[catName].length})</span>
+          <span>${catName} (${categories[catName].length})</span>
           <span class="category-icon">▼</span>
         `;
         catHeader.onclick = () => catGroup.classList.toggle("open");

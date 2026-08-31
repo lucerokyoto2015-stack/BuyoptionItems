@@ -106,7 +106,6 @@
       box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.2);
     }
 
-    /* アイテムカードスタイル */
     .item-card {
       border-bottom: 1px solid var(--border-color);
       padding: 16px 0;
@@ -124,7 +123,6 @@
     .item-name { font-weight: bold; font-size: 1.05rem; }
     .item-price { color: var(--text-sub); font-size: 0.9rem; }
 
-    /* プラクティスシャツ用 名入れオプション領域 */
     .name-print-option {
       display: none;
       background: rgba(255, 214, 0, 0.05);
@@ -230,7 +228,6 @@
     </div>
 
     <form id="orderForm">
-      <!-- STEP 1 -->
       <div id="step1" class="step active">
         <div class="card">
           <h2>① 購入アイテム選択</h2>
@@ -240,7 +237,6 @@
         </div>
       </div>
 
-      <!-- STEP 2 -->
       <div id="step2" class="step">
         <div class="card">
           <h2>② 選手・保護者情報の入力</h2>
@@ -273,7 +269,6 @@
         </div>
       </div>
 
-      <!-- STEP 3 -->
       <div id="step3" class="step">
         <div class="card">
           <h2>③ 申し込み内容の確認</h2>
@@ -317,7 +312,6 @@
         </div>
       </div>
 
-      <!-- STEP 4 -->
       <div id="step4" class="step">
         <div class="card" style="text-align: center; padding: 48px 24px;">
           <h2 style="border: none; color: var(--brand-yellow);">申し込みが完了しました</h2>
@@ -338,28 +332,22 @@
   </div>
 
   <script>
+    // デプロイしたGASの「ウェブアプリURL」を貼り付けてください
     const GAS_ENDPOINT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
-    const sampleItems = [
-      { id: "1", name: "プラクティスシャツ", price: 6600, sizes: ["S", "M", "L", "XL"] },
-      { id: "2", name: "ピステパンツ", price: 5500, sizes: ["S", "M", "L", "XL"] },
-      { id: "3", name: "オフィシャルリュック", price: 9900, sizes: ["FREE"] },
-      { id: "4", name: "トレーニングソックス", price: 1650, sizes: ["23-25cm", "25-27cm", "27-29cm"] }
-    ];
+    let availableItems = [];
 
     document.addEventListener("DOMContentLoaded", fetchItems);
 
     async function fetchItems() {
-      let availableItems = sampleItems;
       try {
-        if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-          const res = await fetch(GAS_ENDPOINT_URL);
-          availableItems = await res.json();
-        }
+        const res = await fetch(GAS_ENDPOINT_URL);
+        availableItems = await res.json();
+        renderItems(availableItems);
       } catch (err) {
-        console.error(err);
+        console.error("商品読み込み失敗", err);
+        document.getElementById("itemList").innerHTML = "<p style='color:red;'>商品の読み込みに失敗しました。</p>";
       }
-      renderItems(availableItems);
     }
 
     function renderItems(items) {
@@ -405,7 +393,6 @@
       });
     }
 
-    // 英大文字・半角スペースのみ自動変換
     function formatUpperAlpha(input) {
       input.value = input.value.toUpperCase().replace(/[^A-Z\s]/g, '');
     }
@@ -456,7 +443,6 @@
         return;
       }
 
-      // プラクティスシャツ選択時の背ネーム入力チェック
       let valid = true;
       document.querySelectorAll(".item-qty").forEach(select => {
         const qty = parseInt(select.value, 10);
@@ -551,29 +537,27 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "送信中...";
 
-     const selectedItems = [];
-document.querySelectorAll(".item-qty").forEach(select => {
-  const qty = parseInt(select.value, 10);
-  if (qty > 0) {
-    const itemId = select.dataset.id;
-    const isShirt = select.dataset.isshirt === "true";
-    const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
-    const printNameInput = document.getElementById(`printName-${itemId}`);
-    
-    // 該当商品のデータ（fetchItemsで保持しているavailableItemsから検索）
-    const itemData = availableItems.find(i => i.id === itemId);
+      const selectedItems = [];
+      document.querySelectorAll(".item-qty").forEach(select => {
+        const qty = parseInt(select.value, 10);
+        if (qty > 0) {
+          const itemId = select.dataset.id;
+          const isShirt = select.dataset.isshirt === "true";
+          const sizeSelect = document.querySelector(`.item-size[data-id="${itemId}"]`);
+          const printNameInput = document.getElementById(`printName-${itemId}`);
+          const itemData = availableItems.find(i => i.id === itemId);
 
-    selectedItems.push({
-      code: itemData ? itemData.code : "",
-      name: select.dataset.name,
-      color: itemData ? itemData.color : "",
-      price: parseInt(select.dataset.price, 10),
-      size: sizeSelect ? sizeSelect.value : "-",
-      printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
-      qty: qty
-    });
-  }
-});
+          selectedItems.push({
+            code: itemData ? itemData.code : "",
+            name: select.dataset.name,
+            color: itemData ? itemData.color : "",
+            price: parseInt(select.dataset.price, 10),
+            size: sizeSelect ? sizeSelect.value : "-",
+            printName: (isShirt && printNameInput) ? printNameInput.value.trim() : "",
+            qty: qty
+          });
+        }
+      });
 
       const payload = {
         grade: document.getElementById("grade").value,
@@ -585,20 +569,16 @@ document.querySelectorAll(".item-qty").forEach(select => {
       };
 
       try {
-        if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
-          await fetch(GAS_ENDPOINT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        await fetch(GAS_ENDPOINT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
         goToStep(4);
       } catch (err) {
         console.error("送信エラー:", err);
-        alert("送信に失敗しました。もう一度お試しください。");
+        alert("送信に失敗しました。時間をおいて再度お試しください。");
         submitBtn.disabled = false;
         submitBtn.textContent = "申込する";
       }

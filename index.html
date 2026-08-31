@@ -113,19 +113,9 @@
 
     .item-card:last-child { border-bottom: none; }
 
-    .item-header {
-      margin-bottom: 12px;
-    }
-
-    .item-title {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-
-    .item-price {
-      color: var(--text-sub);
-      font-size: 0.9rem;
-    }
+    .item-header { margin-bottom: 12px; }
+    .item-title { font-weight: bold; font-size: 1.1rem; }
+    .item-price { color: var(--text-sub); font-size: 0.9rem; }
 
     .selection-row {
       background: rgba(255, 255, 255, 0.03);
@@ -164,9 +154,7 @@
       margin-top: 8px;
     }
 
-    .btn-add-row:hover {
-      background: rgba(255, 214, 0, 0.1);
-    }
+    .btn-add-row:hover { background: rgba(255, 214, 0, 0.1); }
 
     .name-print-box {
       margin-top: 10px;
@@ -376,7 +364,7 @@
 
   <script>
     // デプロイしたGASの「ウェブアプリURL」を入力してください
-    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyNqfDEIm74ngKv8CEesCHG3Jh7LJTd6aLjRptFWR9wXWA8Iw3aRAYNwLo5_fzMmlHwJA/exec";
+    const GAS_ENDPOINT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
     let availableItems = [];
 
@@ -385,17 +373,28 @@
     async function fetchItems() {
       try {
         const res = await fetch(GAS_ENDPOINT_URL);
-        availableItems = await res.json();
+        const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        availableItems = data;
         renderItems(availableItems);
       } catch (err) {
-        console.error("商品読み込み失敗", err);
-        document.getElementById("itemList").innerHTML = "<p style='color:red;'>商品の読み込みに失敗しました。</p>";
+        console.error("商品読み込み失敗:", err);
+        document.getElementById("itemList").innerHTML = `<p style='color:#e53e3e;'>商品の読み込みに失敗しました。<br><small style="color:#b0c4de;">(${err.message})</small></p>`;
       }
     }
 
     function renderItems(items) {
       const container = document.getElementById("itemList");
       container.innerHTML = "";
+
+      if (!items || items.length === 0) {
+        container.innerHTML = "<p style='color: var(--text-sub);'>表示できる商品がありません。</p>";
+        return;
+      }
 
       items.forEach(item => {
         const card = document.createElement("div");
@@ -412,7 +411,6 @@
         `;
 
         container.appendChild(card);
-        // 初期状態として1つ選択行を追加
         addSelectionRow(item.id);
       });
     }
@@ -425,7 +423,9 @@
       const rowIndex = container.children.length;
       const isShirt = item.name.includes("プラクティスシャツ");
 
-      const sizeOptions = item.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+      const sizeOptions = item.sizes.length > 0
+        ? item.sizes.map(s => `<option value="${s}">${s}</option>`).join("")
+        : `<option value="-">-</option>`;
       const qtyOptions = Array.from({length: 6}, (_, i) => `<option value="${i}">${i}</option>`).join("");
 
       const rowDiv = document.createElement("div");
@@ -619,7 +619,6 @@
         totalAmount: calculateTotal().totalPrice
       };
 
-      // no-cors でデータが消えるのを防ぐため、URLSearchParams形式で送信
       const formData = new URLSearchParams();
       formData.append("data", JSON.stringify(payload));
 

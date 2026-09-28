@@ -86,7 +86,7 @@
       color: var(--brand-yellow);
     }
 
-    /* F列ジャンルごとのアコーディオンデザイン */
+    /* G列ジャンルごとのアコーディオンデザイン */
     .category-group {
       margin-bottom: 16px;
       border: 1px solid var(--border-color);
@@ -160,7 +160,22 @@
 
     .item-header { margin-bottom: 12px; }
     .item-title { font-weight: bold; font-size: 1.1rem; }
-    .item-price { color: var(--text-sub); font-size: 0.9rem; }
+    
+    /* 価格表示の追加CSS */
+    .item-price-box {
+      font-size: 0.95rem;
+      margin-top: 2px;
+    }
+    .item-original-price {
+      text-decoration: line-through;
+      color: #8899a6;
+      margin-right: 8px;
+      font-size: 0.85rem;
+    }
+    .item-sale-price {
+      color: var(--brand-yellow);
+      font-weight: bold;
+    }
 
     .selection-row {
       background: rgba(255, 255, 255, 0.03);
@@ -408,7 +423,6 @@
   </div>
 
   <script>
-    // デプロイしたGASのウェブアプリURLを指定
     const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyNqfDEIm74ngKv8CEesCHG3Jh7LJTd6aLjRptFWR9wXWA8Iw3aRAYNwLo5_fzMmlHwJA/exec";
 
     let availableItems = [];
@@ -439,7 +453,7 @@
         return;
       }
 
-      // F列（category）ごとにグループ分類
+      // G列（category）ごとにグループ分類
       const categories = {};
       items.forEach(item => {
         const cat = item.category || "その他";
@@ -450,7 +464,6 @@
       // カテゴリごとにアコーディオンを作成
       Object.keys(categories).forEach((catName, index) => {
         const catGroup = document.createElement("div");
-        // 先頭のカテゴリのみ初期表示で展開
         catGroup.className = `category-group ${index === 0 ? 'open' : ''}`;
 
         const catHeader = document.createElement("div");
@@ -469,10 +482,27 @@
           card.className = "item-card";
           card.dataset.itemId = item.id;
 
+          // 価格表示エリアの作成（元値がある場合は取り消し線で表示）
+          let priceHtml = "";
+          if (item.originalPrice && item.originalPrice > item.price) {
+            priceHtml = `
+              <div class="item-price-box">
+                <span class="item-original-price">¥${item.originalPrice.toLocaleString()}</span>
+                <span class="item-sale-price">¥${item.price.toLocaleString()} (税込)</span>
+              </div>
+            `;
+          } else {
+            priceHtml = `
+              <div class="item-price-box">
+                <span class="item-sale-price">¥${item.price.toLocaleString()} (税込)</span>
+              </div>
+            `;
+          }
+
           card.innerHTML = `
             <div class="item-header">
               <div class="item-title">${item.name}</div>
-              <div class="item-price">¥${item.price.toLocaleString()} (税込)</div>
+              ${priceHtml}
             </div>
             <div class="rows-container" id="rows-${item.id}"></div>
             <button type="button" class="btn-add-row" onclick="addSelectionRow('${item.id}')">＋ カラー・サイズ・数量を追加</button>
@@ -504,7 +534,7 @@
         ? colors.map(c => `<option value="${c}">${c}</option>`).join("")
         : `<option value="-">-</option>`;
 
-      // サイズ（D列）オプション設定
+      // サイズ（F列）オプション設定
       const sizes = item.sizes || [];
       const sizeOptions = sizes.length > 0
         ? sizes.map(s => `<option value="${s}">${s}</option>`).join("")
@@ -570,7 +600,7 @@
         if (!item) return;
 
         const qty = parseInt(row.querySelector(".row-qty").value, 10);
-        const subtotal = item.price * qty;
+        const subtotal = item.price * qty; // 計算は割引後の販売価格（D列）を使用
 
         row.querySelector(".row-subtotal").textContent = `¥${subtotal.toLocaleString()}`;
 
